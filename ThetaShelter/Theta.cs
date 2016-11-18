@@ -50,6 +50,24 @@ namespace ThetaShelter
             return true;
         }
 
+        public string TakePicture()
+        {
+            string state = string.Empty;
+            try
+            {
+                Task.Run(async () =>
+                {
+                    state = await GetState();
+                });
+            }
+            catch
+            {
+                state = string.Empty;
+            }
+
+            return state;     
+        }
+
         private async Task<string> StartSession()
         {
             string uri = "http://192.168.1.1/osc/commands/execute";
@@ -80,6 +98,15 @@ namespace ThetaShelter
 
             await PostAsync(uri, request);
             return;
+        }
+
+        private async Task<string> GetState()
+        {
+            string uri = "http://192.168.1.1/osc/state";
+            string request = @"";
+
+            var result = await PostAsync(uri, request);
+            return Regex.Match(result, ".*\"fingerprint\": \".*\"").ToString();  
         }
 
 

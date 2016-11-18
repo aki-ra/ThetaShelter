@@ -11,20 +11,32 @@ namespace ThetaShelter
     [Activity(Label = "ThetaShelter", MainLauncher = true, Icon = "@drawable/icon")]
     public class MainActivity : Activity
     {
-        int count = 1;
-
+        Button button;
+        Button button2;
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
 
-            // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
-            // Get our button from the layout resource,
-            // and attach an event to it
-            Button button = FindViewById<Button>(Resource.Id.MyButton);
+            button = FindViewById<Button>(Resource.Id.MyButton);
+            button2 = FindViewById<Button>(Resource.Id.MyButton2);
 
-            button.Click += delegate { button.Text = string.Format("{0} clicks!", count++); };
+
+            button.Click += delegate { Connect(); };
+            button2.Click += delegate { TakePicture(); };
+        }
+
+        private void Connect()
+        {
+            string sid = Theta.Instance.Connect().ToString();
+            button.Text = sid;
+
+        }
+
+        private void TakePicture()
+        {
+            button2.Text = Theta.Instance.TakePicture();
         }
     }
 }

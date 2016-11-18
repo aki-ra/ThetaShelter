@@ -13,6 +13,7 @@ using Android.Widget;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using Codeplex.Data;       
 
 namespace ThetaShelter
 {   
@@ -29,7 +30,8 @@ namespace ThetaShelter
         {
             get
             {
-                return theta ?? new Theta();
+                theta = theta ?? new Theta();
+                return theta;
             }
         }
 
@@ -55,16 +57,17 @@ namespace ThetaShelter
             string state = string.Empty;
             try
             {
-                Task.Run(async () =>
+                Task task = Task.Run(async () =>
                 {
-                    state = await GetState();
+                    state = await GetState(); 
                 });
+                task.Wait();                       
             }
             catch
             {
-                state = string.Empty;
+                state = "Exception!!";
             }
-
+                               
             return state;     
         }
 
@@ -77,8 +80,9 @@ namespace ThetaShelter
                 ""parameters"": { }
             }";
 
-            var result = await PostAsync(uri, request);
-            return Regex.Match(result, "\\d{4}").ToString();
+            var json = await PostAsync(uri, request);
+            dynamic result = DynamicJson.Parse(json);
+            return result.parameters.sessionId;
         }
 
         private async Task ChangeApiLevelTo21(string sid)
@@ -94,7 +98,7 @@ namespace ThetaShelter
                         ""clientVersion"": 2
                     }
                 }
-            }".Replace("xxxx", sid);
+            }".Replace("SID_xxxx", sid);
 
             await PostAsync(uri, request);
             return;
@@ -105,8 +109,10 @@ namespace ThetaShelter
             string uri = "http://192.168.1.1/osc/state";
             string request = @"";
 
-            var result = await PostAsync(uri, request);
-            return Regex.Match(result, ".*\"fingerprint\": \".*\"").ToString();  
+            var json = await PostAsync(uri, request);
+            dynamic result = DynamicJson.Parse(json);
+            return result.fingerprint;              
+            
         }
 
 
